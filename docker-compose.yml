@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: carumba_dev
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    command: -p ${DATABASE_PORT:-5433}
+    ports:
+      - 5433:5433
+
+volumes:
+  dbdata:
