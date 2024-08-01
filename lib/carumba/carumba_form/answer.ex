@@ -7,21 +7,26 @@ defmodule Carumba.CarumbaForm.Answer do
   end
 
   actions do
-    defaults [:read]
+    defaults [:read, :destroy]
 
     create :create do
+      primary? true
       accept [:value]
 
-      argument :form, :uuid, allow_nil?: false
+      argument :document, :uuid, allow_nil?: false
       argument :question, :uuid, allow_nil?: false
 
-      change manage_relationship(:form, type: :append_and_remove)
+      change manage_relationship(:document, type: :append_and_remove)
       change manage_relationship(:question, type: :append_and_remove)
     end
 
     update :update do
       accept [:value]
     end
+  end
+
+  validations do
+    validate string_length(:value, min: 5, max: 255)
   end
 
   attributes do
@@ -31,7 +36,16 @@ defmodule Carumba.CarumbaForm.Answer do
   end
 
   relationships do
-    belongs_to :form, Carumba.CarumbaForm.Form
+    belongs_to :document, Carumba.CarumbaForm.Document
     belongs_to :question, Carumba.CarumbaForm.Question
+  end
+
+  calculations do
+    calculate :is_valid?,
+              :boolean,
+              expr(
+                not question.is_required or (question.is_required and value != "") or
+                  (question.is_required and value != nil)
+              )
   end
 end

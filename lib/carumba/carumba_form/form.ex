@@ -14,6 +14,20 @@ defmodule Carumba.CarumbaForm.Form do
 
       argument :questions, {:array, :uuid}, allow_nil?: true
 
+      primary? true
+
+      change manage_relationship(:questions, type: :append_and_remove)
+    end
+
+    update :update do
+      primary? true
+
+      accept [:slug]
+
+      argument :questions, {:array, :uuid}, allow_nil?: true
+
+      require_atomic? false
+
       change manage_relationship(:questions, type: :append_and_remove)
     end
   end
@@ -30,7 +44,5 @@ defmodule Carumba.CarumbaForm.Form do
       source_attribute_on_join_resource :form_id
       destination_attribute_on_join_resource :question_id
     end
-
-    has_many :answers, Carumba.CarumbaForm.Answer
   end
 end

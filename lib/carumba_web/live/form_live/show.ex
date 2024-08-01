@@ -5,6 +5,9 @@ defmodule CarumbaWeb.FormLive.Show do
 
   def mount(%{"id" => id}, _session, socket) do
     form = CarumbaForm.get_form!(id, load: [:questions, :answers])
+    # require IEx
+    # IEx.pry()
+    Ash.calculate!(form, :validations)
     answer = form.answers |> Enum.at(0)
 
     {:ok, assign(socket, form: form, answer: answer)}

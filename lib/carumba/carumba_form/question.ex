@@ -9,13 +9,22 @@ defmodule Carumba.CarumbaForm.Question do
   actions do
     defaults [:read]
 
-    create :create, accept: [:slug]
+    # create :create, accept: [:slug], primary?: true
+
+    create :create do
+      accept [:slug, :is_required]
+      primary? true
+      argument :forms, {:array, :uuid}, allow_nil?: false
+
+      change manage_relationship(:forms, type: :append_and_remove)
+    end
   end
 
   attributes do
     uuid_primary_key :id
 
     attribute :slug, :string
+    attribute :is_required, :boolean, default: false, allow_nil?: false
   end
 
   relationships do

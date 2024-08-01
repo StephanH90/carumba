@@ -12,5 +12,6 @@ defmodule Carumba.CarumbaForm do
 
     resource(Carumba.CarumbaForm.Question)
     resource(Carumba.CarumbaForm.FormQuestion)
+    resource(Carumba.CarumbaForm.Document)
   end
 end

@@ -3,14 +3,22 @@ defmodule CarumbaWeb.FormLive.Question do
   alias Carumba.CarumbaForm.Answer
 
   def update(assigns, socket) do
-    answer_form = prepare_form(assigns.answer, assigns)
+    answer =
+      Enum.find(assigns.document.answers, fn answer ->
+        answer.question_id == assigns.question.id
+      end)
+
+    answer_form = prepare_form(answer, %{document: assigns.document, question: assigns.question})
 
     {
       :ok,
       assign(socket,
-        form: assigns.form,
         question: assigns.question,
-        answer_form: answer_form
+        answer_form: answer_form,
+        validations: assigns.validations,
+        has_been_blurred?: false,
+        answer: answer,
+        document: assigns.document
       )
     }
   end
@@ -21,31 +29,52 @@ defmodule CarumbaWeb.FormLive.Question do
     |> to_form()
   end
 
-  defp prepare_form(nil, assigns) do
+  defp prepare_form(nil, %{document: document, question: question}) do
     AshPhoenix.Form.for_create(Answer, :create)
-    |> AshPhoenix.Form.validate(%{form: assigns.form.id, question: assigns.question.id})
+    |> AshPhoenix.Form.validate(%{document: document.id, question: question.id})
     |> to_form()
   end
 
   def handle_event("save_answer", %{"form" => %{"value" => value}}, socket) do
-    params = %{
-      form: socket.assigns.form.id,
-      question: socket.assigns.question.id,
-      value: value
-    }
+    params = Map.put(socket.assigns.answer_form.params, :value, value)
 
-    AshPhoenix.Form.submit(socket.assigns.answer_form, params: params)
+    if params.value == "" do
+      Ash.destroy!(socket.assigns.answer)
 
-    {:noreply, socket}
+      answer_form =
+        prepare_form(socket.assigns.answer, %{
+          document: socket.assigns.document,
+          question: socket.assigns.question
+        })
+
+      {:noreply, assign(socket, answer_form: answer_form)}
+    else
+      case AshPhoenix.Form.submit(socket.assigns.answer_form, params: params) do
+        {:ok, answer} ->
+          send(self(), {:updated_answer, answer})
+          {:noreply, socket}
+
+        {:error, form} ->
+          {:noreply, assign(socket, answer_form: form)}
+      end
+    end
   end
 
   def render(assigns) do
     ~H"""
-    <div>
-      <.form :let={f} for={@answer_form} phx-change="save_answer" phx-target={@myself}>
-        <div class="flex items-center">
-          <.input type="text" field={f[:value]} phx-debounce="blur" />
-          <.spinner />
+    <div class="mb-8">
+      <.form for={@answer_form} phx-change="save_answer" phx-target={@myself}>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="form-stacked-text">
+          <%= @question.slug %>
+        </label>
+        <div class="relative">
+          <.input
+            type="text"
+            field={@answer_form[:value]}
+            class={[
+              "border w-full p-3 text-gray-700 focus:border-blue-200 transition-colors ease-in-out duration-300"
+            ]}
+          />
         </div>
       </.form>
     </div>
