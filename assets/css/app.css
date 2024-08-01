@@ -3,3 +3,10 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+.loading-spinner {
+  opacity: 0;
+}
+
+form.phx-change-loading .loading-spinner {
+  opacity: 1;
+}

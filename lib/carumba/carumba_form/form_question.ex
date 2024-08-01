@@ -1,5 +1,10 @@
 defmodule Carumba.CarumbaForm.FormQuestion do
-  use Ash.Resource, domain: Carumba.CarumbaForm, data_layer: Ash.DataLayer.Ets
+  use Ash.Resource, domain: Carumba.CarumbaForm, data_layer: AshPostgres.DataLayer
+
+  postgres do
+    table "form_questions"
+    repo Carumba.Repo
+  end
 
   relationships do
     belongs_to :form, Carumba.CarumbaForm.Form, primary_key?: true, allow_nil?: false
@@ -7,6 +12,6 @@ defmodule Carumba.CarumbaForm.FormQuestion do
   end
 
   actions do
-    defaults([:read, :destroy, create: :*, update: :*])
+    defaults [:read, :destroy, create: :*, update: :*]
   end
 end

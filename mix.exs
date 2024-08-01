@@ -35,6 +35,7 @@ defmodule Carumba.MixProject do
     [
       {:ash_postgres, "~> 2.0"},
       {:ash, "~> 3.0"},
+      {:ash_phoenix, "~> 2.0"},
       {:igniter, "~> 0.3"},
       {:phoenix, "~> 1.7.14"},
       {:phoenix_ecto, "~> 4.5"},

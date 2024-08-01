@@ -18,6 +18,8 @@ defmodule CarumbaWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    live "/form/:id", FormLive.Show, :index
   end
 
   # Other scopes may use custom stacks.

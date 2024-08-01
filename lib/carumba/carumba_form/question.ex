@@ -1,23 +1,28 @@
 defmodule Carumba.CarumbaForm.Question do
-  use Ash.Resource, domain: Carumba.CarumbaForm, data_layer: Ash.DataLayer.Ets
+  use Ash.Resource, domain: Carumba.CarumbaForm, data_layer: AshPostgres.DataLayer
+
+  postgres do
+    table "questions"
+    repo Carumba.Repo
+  end
 
   actions do
-    defaults([:read])
+    defaults [:read]
 
     create :create, accept: [:slug]
   end
 
   attributes do
-    uuid_primary_key(:id)
+    uuid_primary_key :id
 
-    attribute(:slug, :string)
+    attribute :slug, :string
   end
 
   relationships do
     many_to_many :forms, Carumba.CarumbaForm.Form do
-      through(Carumba.CarumbaForm.FormQuestion)
-      source_attribute_on_join_resource(:question_id)
-      destination_attribute_on_join_resource(:form_id)
+      through Carumba.CarumbaForm.FormQuestion
+      source_attribute_on_join_resource :question_id
+      destination_attribute_on_join_resource :form_id
     end
   end
 end
