@@ -22,11 +22,14 @@ defmodule Carumba.CarumbaForm.Answer do
 
     update :update do
       accept [:value]
+      primary? true
+      require_atomic? false
     end
   end
 
   validations do
-    validate string_length(:value, min: 5, max: 255)
+    # validate string_length(:value, min: 5, max: 255)
+    validate Carumba.CarumbaForm.Validations.Answer
   end
 
   attributes do
@@ -41,11 +44,12 @@ defmodule Carumba.CarumbaForm.Answer do
   end
 
   calculations do
+    # TODO: REMOVE
     calculate :is_valid?,
               :boolean,
               expr(
-                not question.is_required or (question.is_required and value != "") or
-                  (question.is_required and value != nil)
+                not question.is_required? or (question.is_required? and value != "") or
+                  (question.is_required? and value != nil)
               )
   end
 end

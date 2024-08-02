@@ -1,4 +1,4 @@
-defmodule Carumba.Repo.Migrations.AddIsRequiredToQuestion do
+defmodule Carumba.Repo.Migrations.AlterQuestionConfigurationDefaultToEmptyMap do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 
@@ -9,13 +9,13 @@ defmodule Carumba.Repo.Migrations.AddIsRequiredToQuestion do
 
   def up do
     alter table(:questions) do
-      add :is_required?, :boolean, null: false, default: false
+      modify :configuration, :map, default: %{}
     end
   end
 
   def down do
     alter table(:questions) do
-      remove :is_required?
+      modify :configuration, :map, default: nil
     end
   end
 end

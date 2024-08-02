@@ -1,3 +1,7 @@
+defmodule Carumba.CarumbaForm.QuestionConfiguration do
+  defstruct [:min_length, :max_length]
+end
+
 defmodule Carumba.CarumbaForm.Question do
   use Ash.Resource, domain: Carumba.CarumbaForm, data_layer: AshPostgres.DataLayer
 
@@ -9,10 +13,15 @@ defmodule Carumba.CarumbaForm.Question do
   actions do
     defaults [:read]
 
+    update :update do
+      accept [:slug, :is_required?, :configuration]
+      primary? true
+    end
+
     # create :create, accept: [:slug], primary?: true
 
     create :create do
-      accept [:slug, :is_required]
+      accept [:slug, :is_required?]
       primary? true
       argument :forms, {:array, :uuid}, allow_nil?: false
 
@@ -24,7 +33,16 @@ defmodule Carumba.CarumbaForm.Question do
     uuid_primary_key :id
 
     attribute :slug, :string
-    attribute :is_required, :boolean, default: false, allow_nil?: false
+    attribute :is_required?, :boolean, default: false, allow_nil?: false
+
+    attribute :configuration, :map,
+      constraints: [
+        fields: [
+          min_length: [type: :integer, constraints: [min: 0]],
+          max_length: [type: :integer, constraints: [min: 0]]
+        ]
+      ],
+      default: %{}
   end
 
   relationships do

@@ -10,3 +10,7 @@
 form.phx-change-loading .loading-spinner {
   opacity: 1;
 }
+
+body {
+  font-family: system-ui, BlinkMacSystemFont, -apple-system, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
