@@ -20,15 +20,6 @@ defmodule CarumbaWeb.DocumentLive do
     {:noreply, assign(socket, document: document)}
   end
 
-  @spec handle_event(
-          <<_::104>>,
-          map(),
-          atom()
-          | %{
-              :assigns => atom() | %{:fieldsets => any(), optional(any()) => any()},
-              optional(any()) => any()
-            }
-        ) :: {:noreply, any()}
   def handle_event("update_answer", %{"question_id" => question_id, "value" => value}, socket) do
     fieldsets =
       if Enum.find(socket.assigns.fieldsets, fn validation ->
