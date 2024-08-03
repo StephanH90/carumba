@@ -7,15 +7,15 @@ defmodule CarumbaWeb.DocumentLive do
   def mount(%{"id" => id}, _session, socket) do
     document =
       Ash.get!(Carumba.CarumbaForm.Document, %{id: id},
-        load: [:answers, :validations, form: [:questions]]
+        load: [:answers, :fieldsets, form: [:questions]]
       )
 
-    {:ok, assign(socket, document: document, validations: document.validations)}
+    {:ok, assign(socket, document: document, fieldsets: document.fieldsets)}
   end
 
   def handle_info({:updated_answer, _answer}, socket) do
     # Todo: dont refetch all answers?
-    document = Ash.load!(socket.assigns.document, [:answers, :validations])
+    document = Ash.load!(socket.assigns.document, [:answers, :fieldsets])
 
     {:noreply, assign(socket, document: document)}
   end
@@ -25,17 +25,17 @@ defmodule CarumbaWeb.DocumentLive do
           map(),
           atom()
           | %{
-              :assigns => atom() | %{:validations => any(), optional(any()) => any()},
+              :assigns => atom() | %{:fieldsets => any(), optional(any()) => any()},
               optional(any()) => any()
             }
         ) :: {:noreply, any()}
   def handle_event("update_answer", %{"question_id" => question_id, "value" => value}, socket) do
-    validations =
-      if Enum.find(socket.assigns.validations, fn validation ->
+    fieldsets =
+      if Enum.find(socket.assigns.fieldsets, fn validation ->
            validation.question.id == question_id and not is_nil(validation.answer)
          end) do
         # an answer exists and we need to update it
-        Enum.map(socket.assigns.validations, fn validation ->
+        Enum.map(socket.assigns.fieldsets, fn validation ->
           if not validation.question.is_required? and value == "" do
             # we are trying to delete an answer
             Ash.destroy!(validation.answer)
@@ -56,7 +56,7 @@ defmodule CarumbaWeb.DocumentLive do
         end)
       else
         # there is no answer yet and we need to create one
-        Enum.map(socket.assigns.validations, fn validation ->
+        Enum.map(socket.assigns.fieldsets, fn validation ->
           if validation.question.id == question_id do
             case Ash.create(Carumba.CarumbaForm.Answer, %{
                    question: question_id,
@@ -75,7 +75,7 @@ defmodule CarumbaWeb.DocumentLive do
         end)
       end
 
-    {:noreply, assign(socket, validations: validations)}
+    {:noreply, assign(socket, fieldsets: fieldsets)}
   end
 
   def render(assigns) do
@@ -83,7 +83,7 @@ defmodule CarumbaWeb.DocumentLive do
     <div class="grid grid-cols-4 gap-8">
       <div class="col-span-1">one</div>
       <div class="col-span-3">
-        <.carumba_field :for={field <- @validations} field={field} errors={field.errors} />
+        <.carumba_field :for={field <- @fieldsets} field={field} errors={field.errors} />
       </div>
     </div>
     """

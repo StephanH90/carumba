@@ -20,6 +20,7 @@ defmodule CarumbaWeb.Router do
     get "/", PageController, :home
 
     live "/document/:id", DocumentLive
+    live "/document2/:id", DocumentLiveV2
   end
 
   # Other scopes may use custom stacks.

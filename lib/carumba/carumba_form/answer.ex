@@ -7,7 +7,11 @@ defmodule Carumba.CarumbaForm.Answer do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:destroy, :read]
+
+    read :get_answer do
+      get_by [:document_id, :question_id]
+    end
 
     create :create do
       primary? true
@@ -28,7 +32,6 @@ defmodule Carumba.CarumbaForm.Answer do
   end
 
   validations do
-    # validate string_length(:value, min: 5, max: 255)
     validate Carumba.CarumbaForm.Validations.Answer
   end
 

@@ -4,17 +4,12 @@ defmodule Carumba.CarumbaForm.Validations.Answer do
   alias Carumba.CarumbaForm.Question
 
   @impl true
-  def validate(changeset, _opts, _ctx) do
-    # require IEx
-    # IEx.pry()
-
-    question =
-      Ash.get!(Carumba.CarumbaForm.Question, %{
-        id:
-          changeset.data.question_id ||
-            Ash.Changeset.get_argument_or_attribute(changeset, :question)
-      })
-
+  # def validate(%Ash.Changeset{data: %{question: %Question{} = question}} = changeset, _opts, _ctx) do
+  def validate(
+        %Ash.Changeset{context: %{question: %Question{} = question}} = changeset,
+        _opts,
+        _ctx
+      ) do
     new_value = Ash.Changeset.get_argument_or_attribute(changeset, :value)
 
     changeset = validate_is_required?(changeset, question, new_value)
@@ -51,6 +46,20 @@ defmodule Carumba.CarumbaForm.Validations.Answer do
     end
   end
 
+  def validate(%Ash.Changeset{context: %{}} = changeset, opts, ctx) do
+    # If we haven't preloaded the question in the context we do this now and then rerun this validation function
+    question =
+      Ash.get!(Carumba.CarumbaForm.Question, %{
+        id:
+          changeset.data.question_id ||
+            Ash.Changeset.get_argument_or_attribute(changeset, :question)
+      })
+
+    changeset = Ash.Changeset.put_context(changeset, :question, question)
+
+    validate(changeset, opts, ctx)
+  end
+
   defp validate_is_required?(changeset, %Question{is_required?: true}, new_value)
        when is_nil(new_value) do
     Ash.Changeset.add_error(changeset, field: :value, message: "is required")
@@ -72,10 +81,11 @@ defmodule Carumba.CarumbaForm.Validations.Answer do
          "min_length",
          new_value
        ) do
-    if String.length(new_value) < min_length do
+    if String.length(new_value || "") < min_length do
       Ash.Changeset.add_error(changeset,
         field: :value,
-        message: "length of #{String.length(new_value)} is too short. min length is #{min_length}"
+        message:
+          "length of #{String.length(new_value || "")} is too short. min length is #{min_length}"
       )
     else
       changeset
@@ -89,10 +99,11 @@ defmodule Carumba.CarumbaForm.Validations.Answer do
          "max_length",
          new_value
        ) do
-    if String.length(new_value) > max_length do
+    if String.length(new_value || "") > max_length do
       Ash.Changeset.add_error(changeset,
         field: :value,
-        message: "length of #{String.length(new_value)} is too long. max length is #{max_length}"
+        message:
+          "length of #{String.length(new_value || "")} is too long. max length is #{max_length}"
       )
     else
       changeset
