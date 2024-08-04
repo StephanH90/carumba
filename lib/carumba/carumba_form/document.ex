@@ -58,8 +58,27 @@ defmodule Carumba.CarumbaForm.Document do
   end
 
   calculations do
+    # deprecated
     calculate :fieldsets,
               :map,
               {Carumba.CarumbaForm.Calculations.DocumentValidation, keys: [:answers]}
+
+    calculate :get_answer_for_question, :struct do
+      constraints instance_of: Carumba.CarumbaForm.Answer
+      argument :question_id, :uuid, allow_nil?: false
+      calculation expr(form.questions.id == ^arg(:question_id))
+    end
+
+    calculate :find_answer_for_question, :struct do
+      constraints instance_of: Carumba.CarumbaForm.Answer
+      argument :question_id, :uuid, allow_nil?: false
+      load :answers
+
+      calculation fn records, %{arguments: %{question_id: question_id}} ->
+        Enum.map(records, fn record ->
+          Enum.find(record.answers, fn answer -> answer.question_id == question_id end)
+        end)
+      end
+    end
   end
 end

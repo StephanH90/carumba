@@ -8,10 +8,7 @@ defmodule Carumba.Repo.Migrations.UpdateQuestionFieldsAndAddConfiguration do
   use Ecto.Migration
 
   def up do
-    rename table(:questions), :is_required, to: :is_required?
-
     alter table(:questions) do
-      modify :is_required?, :boolean
       add :configuration, :map
     end
   end
@@ -19,9 +16,6 @@ defmodule Carumba.Repo.Migrations.UpdateQuestionFieldsAndAddConfiguration do
   def down do
     alter table(:questions) do
       remove :configuration
-      modify :is_required, :boolean
     end
-
-    rename table(:questions), :is_required?, to: :is_required
   end
 end

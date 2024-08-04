@@ -1,11 +1,7 @@
 defmodule CarumbaWeb.CarumbaForm.Input do
   use Phoenix.Component
 
-  alias Carumba.CarumbaForm.{Document, Question, Answer}
-
-  import CarumbaWeb.CoreComponents, only: [translate_error: 1, input: 1]
-
-  attr :input, :map, required: true
+  import CarumbaWeb.CoreComponents, only: [translate_error: 1]
 
   def carumba_field(assigns) do
     ~H"""

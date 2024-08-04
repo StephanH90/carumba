@@ -10,6 +10,7 @@ config :carumba, Carumba.Repo,
   password: "postgres",
   hostname: "localhost",
   database: "carumba_test#{System.get_env("MIX_TEST_PARTITION")}",
+  port: 5433,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 

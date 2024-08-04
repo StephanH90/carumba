@@ -8,9 +8,6 @@ defmodule CarumbaWeb.CarumbaForm.InputLiveV3 do
   def field(assigns) do
     ~H"""
     <div class="mb-8">
-      <%!-- <pre>
-        <%= inspect(@form, pretty: true) %>
-      </pre> --%>
       <.form for={@form} phx-value-question_id={@question.id}>
         <label class={[
           "block font-medium mb-2",
@@ -24,9 +21,14 @@ defmodule CarumbaWeb.CarumbaForm.InputLiveV3 do
         <.input
           type="text"
           field={@form[:value]}
-          phx-change={not @form.source.valid? && "save_answer"}
+          phx-change={not @form.source.valid? and @form.source.submitted_once? && "save_answer"}
           phx-value-question_id={@question.id}
           phx-blur="save_answer"
+          class={[
+            "block w-full p-2 border text-slate-800 font-extralight rounded-none",
+            not @form.source.valid? and @form.source.submitted_once? && "text-red-500 border-red-500"
+          ]}
+          onkeydown="return event.key != 'Enter';"
         />
 
         <div :for={error <- translate_errors(@form.errors, :value)} class="text-red-500 mt-2">
