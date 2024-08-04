@@ -10,6 +10,23 @@ defmodule Carumba.CarumbaForm.Question do
     repo Carumba.Repo
   end
 
+  attributes do
+    uuid_primary_key :id
+
+    attribute :slug, :string
+    attribute :is_required?, :boolean, default: false, allow_nil?: false
+    attribute :type, :atom, default: :text, allow_nil?: false, constraints: [one_of: [:text, :textarea, :number, :float, :choice, :multiple_choice]]
+
+    attribute :configuration, :map,
+      constraints: [
+        fields: [
+          min_length: [type: :integer, constraints: [min: 0]],
+          max_length: [type: :integer, constraints: [min: 0]]
+        ]
+      ],
+      default: %{}
+  end
+
   actions do
     defaults [:read]
 
@@ -27,22 +44,6 @@ defmodule Carumba.CarumbaForm.Question do
 
       change manage_relationship(:forms, type: :append_and_remove)
     end
-  end
-
-  attributes do
-    uuid_primary_key :id
-
-    attribute :slug, :string
-    attribute :is_required?, :boolean, default: false, allow_nil?: false
-
-    attribute :configuration, :map,
-      constraints: [
-        fields: [
-          min_length: [type: :integer, constraints: [min: 0]],
-          max_length: [type: :integer, constraints: [min: 0]]
-        ]
-      ],
-      default: %{}
   end
 
   relationships do

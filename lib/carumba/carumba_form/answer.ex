@@ -1,9 +1,60 @@
+defmodule Carumba.AnswerValue do
+  use Ash.Type
+
+  @moduledoc """
+  Custom type for storing answer values as jsonb in the database.
+  """
+
+  @impl Ash.Type
+  def storage_type(_), do: :jsonb
+
+  @impl Ash.Type
+  def cast_input(nil, _), do: {:ok, nil}
+
+  def cast_input(value, _) do
+    cast_value(value)
+  end
+
+  @impl Ash.Type
+  def cast_stored(nil, _), do: {:ok, nil}
+
+  def cast_stored(value, _) do
+    cast_value(value)
+  end
+
+  @impl Ash.Type
+  def dump_to_native(nil, _), do: {:ok, nil}
+
+  def dump_to_native(value, _) do
+    cast_value(value)
+  end
+
+  def cast_value(value) do
+    with :error <- Ecto.Type.cast(:integer, value),
+         :error <- Ecto.Type.cast(:float, value),
+         :error <- Ecto.Type.cast(:string, value),
+         :error <- Ecto.Type.cast(:map, value),
+         :error <- Ecto.Type.cast({:array, :integer}, value),
+         :error <- Ecto.Type.cast({:array, :float}, value),
+         :error <- Ecto.Type.cast({:array, :string}, value),
+         :error <- Ecto.Type.cast({:array, :map}, value) do
+      :error
+    end
+  end
+end
+
 defmodule Carumba.CarumbaForm.Answer do
   use Ash.Resource, domain: Carumba.CarumbaForm, data_layer: AshPostgres.DataLayer
 
   postgres do
     table "answers"
     repo Carumba.Repo
+  end
+
+  attributes do
+    uuid_primary_key :id
+
+    attribute :value, :carumba_value
   end
 
   actions do
@@ -33,12 +84,6 @@ defmodule Carumba.CarumbaForm.Answer do
 
   validations do
     validate Carumba.CarumbaForm.Validations.Answer
-  end
-
-  attributes do
-    uuid_primary_key :id
-
-    attribute :value, :string
   end
 
   relationships do
