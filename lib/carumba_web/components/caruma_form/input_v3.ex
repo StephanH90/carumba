@@ -21,6 +21,7 @@ defmodule CarumbaWeb.CarumbaForm.InputLiveV3 do
         <.input
           type="text"
           field={@form[:value]}
+          id={["field-", @question.id]}
           phx-change={not @form.source.valid? and @form.source.submitted_once? && "save_answer"}
           phx-value-question_id={@question.id}
           phx-blur="save_answer"

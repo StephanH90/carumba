@@ -38,7 +38,7 @@ defmodule Carumba.CarumbaForm.Question do
     # create :create, accept: [:slug], primary?: true
 
     create :create do
-      accept [:slug, :is_required?, :configuration]
+      accept [:slug, :is_required?, :type, :configuration]
       primary? true
       argument :forms, {:array, :uuid}, allow_nil?: false
 

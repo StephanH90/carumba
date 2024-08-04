@@ -6,10 +6,13 @@ defmodule CarumbaWeb.DocumentLiveV3 do
   import CarumbaWeb.CarumbaForm.InputLiveV3, only: [field: 1]
 
   def mount(%{"id" => id}, _session, socket) do
-    CarumbaWeb.Endpoint.subscribe("document-#{id}")
-
+    # ! Just for testing we always load the first document that was seeded
+    # document =
+    #   Ash.get!(Carumba.CarumbaForm.Document, %{id: id}, load: [:answers, form: [:questions]])
     document =
-      Ash.get!(Carumba.CarumbaForm.Document, %{id: id}, load: [:answers, form: [:questions]])
+      Ash.read_one!(Carumba.CarumbaForm.Document, load: [:answers, form: [:questions]])
+
+    CarumbaWeb.Endpoint.subscribe("document-#{document.id}")
 
     fields = prepare_fields(document)
 

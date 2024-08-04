@@ -17,7 +17,7 @@ config :carumba,
 
 # Configures the endpoint
 config :carumba, CarumbaWeb.Endpoint,
-  url: [host: "localhost"],
+  url: [host: "0.0.0.0"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: CarumbaWeb.ErrorHTML, json: CarumbaWeb.ErrorJSON],

@@ -5,10 +5,12 @@ defmodule CarumbaWeb.DocumentLive do
 
   # TODO: RENAME VALIDIAIONS TO FIELDS or fieldsets?
   def mount(%{"id" => id}, _session, socket) do
-    document =
-      Ash.get!(Carumba.CarumbaForm.Document, %{id: id},
-        load: [:answers, :fieldsets, form: [:questions]]
-      )
+    # document =
+    #   Ash.get!(Carumba.CarumbaForm.Document, %{id: id},
+    #     load: [:answers, :fieldsets, form: [:questions]]
+    #   )
+    # ! Just for testing we always load the first document that was seeded
+    document = Ash.read_one!(Carumba.CarumbaForm.Document, load: [:answers, :fieldsets, form: [:questions]])
 
     {:ok, assign(socket, document: document, fieldsets: document.fieldsets)}
   end
