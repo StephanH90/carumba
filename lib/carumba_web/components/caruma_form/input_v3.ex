@@ -25,11 +25,14 @@ defmodule CarumbaWeb.CarumbaForm.InputLiveV3 do
           phx-change={not @form.source.valid? and @form.source.submitted_once? && "save_answer"}
           phx-value-question_id={@question.id}
           phx-blur="save_answer"
+          phx-focus="focus_input"
           class={[
             "block w-full p-2 border text-slate-800 font-extralight rounded-none",
-            not @form.source.valid? and @form.source.submitted_once? && "text-red-500 border-red-500"
+            not @form.source.valid? and @form.source.submitted_once? && "text-red-500 border-red-500",
+            @field.in_use? && "bg-gray-100"
           ]}
           onkeydown="return event.key != 'Enter';"
+          disabled={@field.in_use? && true}
         />
 
         <div :for={error <- translate_errors(@form.errors, :value)} class="text-red-500 mt-2">

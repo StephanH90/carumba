@@ -16,20 +16,17 @@ defmodule CarumbaWeb.DocumentLiveV3 do
 
     fields = prepare_fields(document)
 
-    {:ok, assign(socket, document: document, fields: fields)}
+    my_id = :rand.uniform(10000)
+
+    {:ok, assign(socket, document: document, fields: fields, my_id: my_id)}
   end
 
   def render(assigns) do
     ~H"""
     <div>
-      <.field :for={field <- @fields} id={["field-", field.question.id]} form={field.form} question={field.question} />
+      <.field :for={field <- @fields} id={["field-", field.question.id]} form={field.form} question={field.question} field={field} />
     </div>
     """
-  end
-
-  def handle_info(%{event: "updated_answer", payload: updated_document}, socket) do
-    fields = prepare_fields(updated_document)
-    {:noreply, assign(socket, document: updated_document, fields: fields)}
   end
 
   def handle_event("save_answer", params, %{assigns: %{document: document}} = socket) do
@@ -41,6 +38,21 @@ defmodule CarumbaWeb.DocumentLiveV3 do
     answer = Ash.calculate!(document, :find_answer_for_question, args: %{question_id: question.id})
 
     handle_save_event(question, answer, %{value: value}, socket)
+  end
+
+  def handle_event("focus_input", %{"question_id" => question_id}, socket) do
+    CarumbaWeb.Endpoint.broadcast_from!(self(), "document-#{socket.assigns.document.id}", "input_focused", {question_id, socket.assigns.my_id, true})
+
+    {:noreply, socket}
+  end
+
+  def handle_info(%{event: "updated_answer", payload: updated_document}, socket) do
+    fields = prepare_fields(updated_document)
+    {:noreply, assign(socket, document: updated_document, fields: fields)}
+  end
+
+  def handle_info(%{event: "input_focused", payload: {question_id, user_id, new_state}}, socket) do
+    {:noreply, set_in_use(socket, question_id, new_state)}
   end
 
   @doc """
@@ -67,7 +79,8 @@ defmodule CarumbaWeb.DocumentLiveV3 do
         fields = update_field_form(socket, question, answer, nil)
         document = update_or_append_answer(socket.assigns.document, answer)
 
-        CarumbaWeb.Endpoint.broadcast("document-#{document.id}", "updated_answer", document)
+        CarumbaWeb.Endpoint.broadcast_from!(self(), "document-#{document.id}", "updated_answer", document)
+        CarumbaWeb.Endpoint.broadcast_from!(self(), "document-#{document.id}", "input_focused", {question.id, socket.assigns.my_id, false})
 
         {:noreply, assign(socket, fields: fields, document: document)}
 
@@ -100,9 +113,23 @@ defmodule CarumbaWeb.DocumentLiveV3 do
 
       %{
         question: question,
-        form: prepare_form(document, question, answer)
+        form: prepare_form(document, question, answer),
+        in_use?: false
       }
     end)
+  end
+
+  def set_in_use(socket, question_id, new_value) do
+    fields =
+      Enum.map(socket.assigns.fields, fn field ->
+        if field.question.id == question_id do
+          %{field | in_use?: new_value}
+        else
+          field
+        end
+      end)
+
+    assign(socket, fields: fields)
   end
 
   @doc """
