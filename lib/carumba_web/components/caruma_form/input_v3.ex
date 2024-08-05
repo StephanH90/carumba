@@ -8,7 +8,7 @@ defmodule CarumbaWeb.CarumbaForm.InputLiveV3 do
   def field(assigns) do
     ~H"""
     <div class="mb-8">
-      <.form for={@form} phx-value-question_id={@question.id}>
+      <.form :if={not @field.is_hidden?} for={@form} phx-value-question_id={@question.id}>
         <label class={[
           "block font-medium mb-2",
           !@form.source.valid? && length(@form.errors) > 0 && "text-red-600"

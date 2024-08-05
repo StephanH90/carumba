@@ -16,6 +16,7 @@ defmodule Carumba.CarumbaForm.Question do
     attribute :slug, :string
     attribute :is_required?, :boolean, default: false, allow_nil?: false
     attribute :type, :atom, default: :text, allow_nil?: false, constraints: [one_of: [:text, :textarea, :number, :float, :choice, :multiple_choice]]
+    attribute :is_hidden, :string, default: "false", allow_nil?: false
 
     attribute :configuration, :map,
       constraints: [
@@ -31,14 +32,14 @@ defmodule Carumba.CarumbaForm.Question do
     defaults [:read]
 
     update :update do
-      accept [:slug, :is_required?, :configuration]
+      accept [:slug, :is_required?, :configuration, :is_hidden]
       primary? true
     end
 
     # create :create, accept: [:slug], primary?: true
 
     create :create do
-      accept [:slug, :is_required?, :type, :configuration]
+      accept [:slug, :is_required?, :type, :is_hidden, :configuration]
       primary? true
       argument :forms, {:array, :uuid}, allow_nil?: false
 
@@ -52,5 +53,9 @@ defmodule Carumba.CarumbaForm.Question do
       source_attribute_on_join_resource :question_id
       destination_attribute_on_join_resource :form_id
     end
+  end
+
+  preparations do
+    prepare build(sort: :slug)
   end
 end

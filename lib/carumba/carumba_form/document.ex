@@ -71,12 +71,12 @@ defmodule Carumba.CarumbaForm.Document do
 
     calculate :find_answer_for_question, :struct do
       constraints instance_of: Carumba.CarumbaForm.Answer
-      argument :question_id, :uuid, allow_nil?: false
-      load :answers
+      argument :slug, :string, allow_nil?: false
+      load answers: :question
 
-      calculation fn records, %{arguments: %{question_id: question_id}} ->
+      calculation fn records, %{arguments: %{slug: slug}} ->
         Enum.map(records, fn record ->
-          Enum.find(record.answers, fn answer -> answer.question_id == question_id end)
+          Enum.find(record.answers, fn answer -> answer.question.slug == slug end)
         end)
       end
     end

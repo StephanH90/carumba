@@ -20,9 +20,26 @@ if length(forms) == 0 do
   # only load the fixtures if we havent done so yet
   form = Ash.create!(Form, %{slug: "test-form"})
 
-  question_1 = Ash.create!(Question, %{slug: "a-question", type: :text, forms: [form.id], is_required?: false})
-  question_2 = Ash.create!(Question, %{slug: "another-question", type: :text, forms: [form.id], configuration: %{min_length: 5, max_length: 10}})
-  question_2 = Ash.create!(Question, %{slug: "a-third-question", type: :number, forms: [form.id], is_required?: true})
+  Enum.each(1..10, fn i ->
+    Ash.create!(Question, %{
+      slug: "question-#{i}",
+      type: Enum.random([:text, :textarea, :number]),
+      forms: [form.id],
+      is_required?: Enum.random([true, false])
+    })
+  end)
+
+  Enum.each(11..50, fn i ->
+    is_hidden = "\"question-#{Enum.random(1..5)}\"|answer #{Enum.random([">", "<", "=="])} 5"
+
+    Ash.create!(Question, %{
+      slug: "question-#{i}",
+      type: Enum.random([:text, :textarea, :number]),
+      forms: [form.id],
+      is_required?: Enum.random([true, false]),
+      is_hidden: is_hidden
+    })
+  end)
 
   document = Ash.create!(Document, %{form: form.id})
 end

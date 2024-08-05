@@ -10,7 +10,7 @@ defmodule CarumbaWeb.DocumentLiveV3 do
     # document =
     #   Ash.get!(Carumba.CarumbaForm.Document, %{id: id}, load: [:answers, form: [:questions]])
     document =
-      Ash.read_one!(Carumba.CarumbaForm.Document, load: [:answers, form: [:questions]])
+      Ash.read_one!(Carumba.CarumbaForm.Document, load: [answers: :question, form: [:questions]])
 
     CarumbaWeb.Endpoint.subscribe("document-#{document.id}")
 
@@ -35,7 +35,7 @@ defmodule CarumbaWeb.DocumentLiveV3 do
 
     %{question: question} = get_field_for_question(socket, question_id)
 
-    answer = Ash.calculate!(document, :find_answer_for_question, args: %{question_id: question.id})
+    answer = Ash.calculate!(document, :find_answer_for_question, args: %{slug: question.slug})
 
     handle_save_event(question, answer, %{value: value}, socket)
   end
@@ -46,13 +46,13 @@ defmodule CarumbaWeb.DocumentLiveV3 do
     {:noreply, socket}
   end
 
+  def handle_info(%{event: "input_focused", payload: {question_id, user_id, new_state}}, socket) do
+    {:noreply, set_in_use(socket, question_id, new_state)}
+  end
+
   def handle_info(%{event: "updated_answer", payload: updated_document}, socket) do
     fields = prepare_fields(updated_document)
     {:noreply, assign(socket, document: updated_document, fields: fields)}
-  end
-
-  def handle_info(%{event: "input_focused", payload: {question_id, user_id, new_state}}, socket) do
-    {:noreply, set_in_use(socket, question_id, new_state)}
   end
 
   @doc """
@@ -78,6 +78,7 @@ defmodule CarumbaWeb.DocumentLiveV3 do
       {:ok, %Answer{} = answer} ->
         fields = update_field_form(socket, question, answer, nil)
         document = update_or_append_answer(socket.assigns.document, answer)
+        fields = prepare_fields(document)
 
         CarumbaWeb.Endpoint.broadcast_from!(self(), "document-#{document.id}", "updated_answer", document)
         CarumbaWeb.Endpoint.broadcast_from!(self(), "document-#{document.id}", "input_focused", {question.id, socket.assigns.my_id, false})
@@ -109,12 +110,13 @@ defmodule CarumbaWeb.DocumentLiveV3 do
 
   def prepare_fields(%Document{form: %{questions: questions}} = document) do
     Enum.map(questions, fn question ->
-      answer = Ash.calculate!(document, :find_answer_for_question, args: %{question_id: question.id})
+      answer = Ash.calculate!(document, :find_answer_for_question, args: %{slug: question.slug})
 
       %{
         question: question,
         form: prepare_form(document, question, answer),
-        in_use?: false
+        in_use?: false,
+        is_hidden?: Carumba.QuestionParser.parse_and_evaluate(question.is_hidden, document)
       }
     end)
   end
