@@ -16,15 +16,21 @@ services:
     image: "hexpm/elixir:1.17.1-erlang-27.0-debian-bullseye-20240701-slim"
     volumes:
       - .:/app
+      - cargo-cache:/root/.cargo
     working_dir: /app
     environment:
       POSTGRES_HOST: "db"
+      PATH: "/root/.cargo/bin:${PATH}"
     command: >
       sh -c "
-        apt-get update -y && apt-get install -y build-essential git
-        apt-get clean
-        dpkg --configure -a
-        rm -f /var/lib/apt/lists/*_*
+        apt-get update -y && 
+        apt-get install -y build-essential git curl &&
+        apt-get clean &&
+        dpkg --configure -a &&
+        rm -f /var/lib/apt/lists/*_* &&
+        if [ ! -f /root/.cargo/bin/cargo ]; then
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y;
+        fi &&
         mix local.hex --force &&
         mix local.rebar --force &&
         mix deps.get &&
@@ -37,3 +43,4 @@ services:
 
 volumes:
   dbdata:
+  cargo-cache:
