@@ -62,6 +62,7 @@ defmodule Carumba.CarumbaForm.Answer do
 
     read :get_answer do
       get_by [:document_id, :question_id]
+      get? true
     end
 
     create :create do

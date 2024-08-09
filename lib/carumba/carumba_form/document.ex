@@ -1,6 +1,10 @@
 defmodule Carumba.CarumbaForm.Document do
   use Ash.Resource, domain: Carumba.CarumbaForm, data_layer: AshPostgres.DataLayer
 
+  alias Carumba.CarumbaForm.Answer
+  alias Carumba.CarumbaForm.Form
+  alias Carumba.CarumbaForm.Question
+
   postgres do
     table "documents"
     repo Carumba.Repo
@@ -17,33 +21,20 @@ defmodule Carumba.CarumbaForm.Document do
       change manage_relationship(:form, type: :append_and_remove)
     end
 
-    action :save_answer do
-      argument :value, :string
-      argument :question, :uuid, allow_nil?: false
-      argument :document, :uuid, allow_nil?: false
+    action :get_answer, :struct do
+      constraints instance_of: Answer
 
-      run fn input, ctx ->
-        require IEx
-        IEx.pry()
+      argument :document, :struct, allow_nil?: false, constraints: [instance_of: __MODULE__]
+      argument :question, :struct, allow_nil?: false, constraints: [instance_of: Question]
 
-        document = Ash.read!(Carumba.CarumbaForm.Document, %{id: input.arguments.document})
-        question = Ash.read!(Carumba.CarumbaForm.Question, %{id: input.arguments.question})
+      run fn %{arguments: %{document: document, question: question}}, _ctx ->
+        document = Ash.load!(document, [:answers], lazy?: true)
 
-        case Carumba.CarumbaForm.get_answer(%{
-               document_id: document.id,
-               question_id: question.id
-             }) do
-          {:ok, answer} ->
-            # we already have an answer and need to update it instead
-            :ok
-
-          {:error, _} ->
-            # we need to create a new answer
-            :ok
-        end
-
-        # This is a placeholder
-        {:ok, "Hello: #{input.arguments.name}"}
+        {
+          :ok,
+          document.answers
+          |> Enum.find(&(&1.question_id == question.id))
+        }
       end
     end
   end
@@ -53,32 +44,7 @@ defmodule Carumba.CarumbaForm.Document do
   end
 
   relationships do
-    belongs_to :form, Carumba.CarumbaForm.Form
-    has_many :answers, Carumba.CarumbaForm.Answer
-  end
-
-  calculations do
-    # deprecated
-    calculate :fieldsets,
-              :map,
-              {Carumba.CarumbaForm.Calculations.DocumentValidation, keys: [:answers]}
-
-    calculate :get_answer_for_question, :struct do
-      constraints instance_of: Carumba.CarumbaForm.Answer
-      argument :question_id, :uuid, allow_nil?: false
-      calculation expr(form.questions.id == ^arg(:question_id))
-    end
-
-    calculate :find_answer_for_question, :struct do
-      constraints instance_of: Carumba.CarumbaForm.Answer
-      argument :slug, :string, allow_nil?: false
-      load answers: :question
-
-      calculation fn records, %{arguments: %{slug: slug}} ->
-        Enum.map(records, fn record ->
-          Enum.find(record.answers, fn answer -> answer.question.slug == slug end)
-        end)
-      end
-    end
+    belongs_to :form, Form
+    has_many :answers, Answer
   end
 end
