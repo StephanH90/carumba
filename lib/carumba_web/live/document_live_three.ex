@@ -5,7 +5,7 @@ defmodule CarumbaWeb.DocumentLiveV3 do
 
   import CarumbaWeb.CarumbaForm.InputLiveV3, only: [field: 1]
 
-  def mount(%{"id" => id}, _session, socket) do
+  def mount(_params, _session, socket) do
     document =
       Ash.read_one!(Document, load: [answers: [:question], form: [:questions]])
 

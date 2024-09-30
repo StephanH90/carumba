@@ -80,7 +80,6 @@ defmodule Carumba.CarumbaForm.Answer do
       accept [:value]
       primary? true
       require_atomic? false
-      change load :question
     end
   end
 

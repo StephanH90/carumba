@@ -22,6 +22,7 @@ defmodule CarumbaWeb.Router do
     live "/document/:id", DocumentLive
     live "/document2/:id", DocumentLiveV2
     live "/document3/:id", DocumentLiveV3
+    live "/document4/:id", DocumentLiveV4
   end
 
   # Other scopes may use custom stacks.

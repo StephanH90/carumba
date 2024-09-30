@@ -4,7 +4,7 @@ defmodule CarumbaWeb.DocumentLive do
   import CarumbaWeb.CarumbaForm.Input, only: [carumba_field: 1]
 
   # TODO: RENAME VALIDIAIONS TO FIELDS or fieldsets?
-  def mount(%{"id" => id}, _session, socket) do
+  def mount(_params, _session, socket) do
     # document =
     #   Ash.get!(Carumba.CarumbaForm.Document, %{id: id},
     #     load: [:answers, :fieldsets, form: [:questions]]

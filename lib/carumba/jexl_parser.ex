@@ -24,19 +24,19 @@ defmodule Carumba.QuestionParser do
     end
   end
 
-  def fetch_value_of_answer_for_question(%Document{} = document, slug) do
-    case Ash.calculate(document, :find_answer_for_question, args: %{slug: slug}) do
-      {:ok, %Answer{value: value}} -> {:ok, value}
-      error -> error
-    end
-  end
-
   def parse_and_evaluate(input, fetch_value_fn) do
     with {slug, logic} <- parse_string(input),
          {:ok, value} <- fetch_value_fn.(slug),
          {:ok, result} <- evaluate_logic(logic, value) do
       {:ok, slug, result}
     else
+      error -> error
+    end
+  end
+
+  def fetch_value_of_answer_for_question(%Document{} = document, slug) do
+    case Ash.calculate(document, :find_answer_for_question, args: %{slug: slug}) do
+      {:ok, %Answer{value: value}} -> {:ok, value}
       error -> error
     end
   end

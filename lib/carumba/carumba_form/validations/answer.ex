@@ -80,12 +80,12 @@ defmodule Carumba.CarumbaForm.Validations.Answer do
          %Question{configuration: %{"min_length" => min_length}},
          "min_length",
          new_value
-       ) do
+       )
+       when is_binary(new_value) do
     if String.length(new_value || "") < min_length do
       Ash.Changeset.add_error(changeset,
         field: :value,
-        message:
-          "length of #{String.length(new_value || "")} is too short. min length is #{min_length}"
+        message: "length of #{String.length(new_value || "")} is too short. min length is #{min_length}"
       )
     else
       changeset
@@ -98,12 +98,12 @@ defmodule Carumba.CarumbaForm.Validations.Answer do
          %Question{configuration: %{"max_length" => max_length}},
          "max_length",
          new_value
-       ) do
+       )
+       when is_binary(new_value) do
     if String.length(new_value || "") > max_length do
       Ash.Changeset.add_error(changeset,
         field: :value,
-        message:
-          "length of #{String.length(new_value || "")} is too long. max length is #{max_length}"
+        message: "length of #{String.length(new_value || "")} is too long. max length is #{max_length}"
       )
     else
       changeset
