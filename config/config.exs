@@ -9,7 +9,7 @@ import Config
 
 config :carumba, :ash_domains, [Carumba.CarumbaForm]
 
-config :ash, :custom_types, carumba_value: Carumba.AnswerValue
+config :ash, :custom_types, carumba_value: Carumba.CarumbaForm.Types.AnswerValue
 
 config :carumba,
   ecto_repos: [Carumba.Repo],
@@ -39,7 +39,8 @@ config :carumba, Carumba.Mailer, adapter: Swoosh.Adapters.Local
 config :esbuild,
   version: "0.17.11",
   carumba: [
-    args: ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
+    args:
+      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]

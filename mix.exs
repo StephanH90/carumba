@@ -34,7 +34,7 @@ defmodule Carumba.MixProject do
   defp deps do
     [
       {:ash_postgres, "~> 2.0"},
-      {:ash, "~> 3.0"},
+      {:ash, github: "ash-project/ash", branch: "main", override: true},
       {:ash_phoenix, "~> 2.0"},
       {:igniter, "~> 0.3"},
       {:phoenix, "~> 1.7.14"},
@@ -61,7 +61,10 @@ defmodule Carumba.MixProject do
       {:bandit, "~> 1.5"},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
       {:rustler, "~> 0.34.0"},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:nimble_parsec, "~> 1.4"},
+      {:smokestack, "~> 0.9.0", only: [:test], runtime: false},
+      {:faker, "~> 0.18", only: :test}
     ]
   end
 

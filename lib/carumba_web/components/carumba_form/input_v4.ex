@@ -11,14 +11,13 @@ defmodule CarumbaWeb.CarumbaForm.InputV4 do
   end
 
   @impl true
-  def update(%{document: document, question: question} = assigns, socket) do
+  def update(%{document: document, question: question} = _assigns, socket) do
     {:ok, answer} = Carumba.CarumbaForm.get_answer(document, question)
 
     {:ok, assign(socket, answer: answer, form: prepare_form(document, question, answer), question: question)}
   end
 
   @impl true
-  # def render(assigns) do
   def render(assigns) do
     ~H"""
     <div class="mb-8">
@@ -30,7 +29,7 @@ defmodule CarumbaWeb.CarumbaForm.InputV4 do
           <% end %>
         </label>
 
-        <.input type="text" field={@form[:value]} id={["field-", @question.id]} onkeydown="return event.key != 'Enter';" />
+        <.input type="text" field={@form[:value]} id={["field-", @question.slug]} onkeydown="return event.key != 'Enter';" />
 
         <div :for={error <- translate_errors(@form.errors, :value)} class="text-red-500 mt-2">
           <%= error %>
@@ -47,16 +46,6 @@ defmodule CarumbaWeb.CarumbaForm.InputV4 do
       socket
       |> assign(form: AshPhoenix.Form.validate(form, %{value: value}))
     }
-
-    # case AshPhoenix.Form.validate(form, %{value: value}) do
-    #   {:ok, %Answer{} = answer} ->
-    #     IO.inspect(answer, pretty: true)
-    #     {:noreply, socket}
-
-    #   {:error, form} ->
-    #     IO.inspect(form, pretty: true)
-    #     {:noreply, assign(socket, form: form)}
-    # end
   end
 
   defp prepare_form(%Document{} = document, %Question{} = question) do

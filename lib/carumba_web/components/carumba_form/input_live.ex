@@ -84,11 +84,11 @@ defmodule CarumbaWeb.CarumbaForm.InputLive do
     |> to_form()
   end
 
-  def ash_form(%Document{id: document_id} = document, %Question{id: question_id} = question, nil) do
+  def ash_form(%Document{id: document_id} = document, %Question{slug: slug} = question, nil) do
     AshPhoenix.Form.for_create(Answer, :create,
       prepare_source: fn changeset ->
         changeset
-        |> Ash.Changeset.set_arguments(question: question_id, document: document_id)
+        |> Ash.Changeset.set_arguments(question: slug, document: document_id)
         |> Ash.Changeset.put_context(:document, document)
         |> Ash.Changeset.put_context(:question, question)
       end
