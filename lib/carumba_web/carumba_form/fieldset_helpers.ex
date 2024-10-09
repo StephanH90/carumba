@@ -8,12 +8,15 @@ defmodule CarumbaWeb.CarumbaForm.FieldsetHelpers do
 
   @spec construct_fieldset(Carumba.CarumbaForm.Document.t(), Carumba.CarumbaForm.Form.t()) :: Carumba.Types.Fieldset.t()
   def construct_fieldset(document, form) do
-    %Fieldset{
+    fieldset = %Fieldset{
       document: document,
       form: form,
       fields: prepare_fields(document, form),
       fieldsets: prepare_fieldsets(document, form)
     }
+
+    fieldset
+    |> update_deep_validation()
   end
 
   @spec update_answer_in_fieldset(Carumba.Types.Fieldset.t(), Carumba.CarumbaForm.Answer.t()) ::
@@ -25,7 +28,32 @@ defmodule CarumbaWeb.CarumbaForm.FieldsetHelpers do
 
     new_answers = [updated_answer | cleaned_answers]
 
-    %{fieldset | document: %{fieldset.document | answers: new_answers}}
+    fieldset = %{fieldset | document: %{fieldset.document | answers: new_answers}}
+
+    fieldset
+    |> update_answer_in_fields(updated_answer)
+  end
+
+  defp update_answer_in_fields(fieldset, updated_answer) do
+    # Update the fields with the new answer if the question matches
+    updated_fields =
+      Enum.map(fieldset.fields, fn field ->
+        if field.question.slug == updated_answer.question_id do
+          # Update the field with the new answer
+          %{field | answer: updated_answer}
+        else
+          field
+        end
+      end)
+
+    # Recursively update nested fieldsets
+    updated_fieldsets =
+      Enum.map(fieldset.fieldsets, fn nested_fieldset ->
+        update_answer_in_fields(nested_fieldset, updated_answer)
+      end)
+
+    # Return the updated fieldset with updated fields and nested fieldsets
+    %{fieldset | fields: updated_fields, fieldsets: updated_fieldsets}
   end
 
   defp prepare_fieldsets(document, form) do
@@ -48,10 +76,55 @@ defmodule CarumbaWeb.CarumbaForm.FieldsetHelpers do
         answer: get_answer_for_document(document, question)
       }
     end)
+    |> Enum.map(fn field ->
+      %{field | is_valid?: validate(field)}
+    end)
   end
 
   defp get_answer_for_document(document, question) do
     document.answers
     |> Enum.find(&(&1.question_id == question.slug))
+  end
+
+  defp update_deep_validation(fieldset) do
+    # Recursively update nested fieldsets
+    updated_fieldsets =
+      Enum.map(fieldset.fieldsets, fn nested_fieldset ->
+        update_deep_validation(nested_fieldset)
+      end)
+
+    # Update the fields with their validation statuses
+    updated_fields =
+      Enum.map(fieldset.fields, fn field ->
+        %{field | is_valid?: validate(field)}
+      end)
+
+    # Create an updated fieldset with the validated fields and nested fieldsets
+    updated_fieldset = %{fieldset | fields: updated_fields, fieldsets: updated_fieldsets}
+
+    # Update the is_valid? flag of the updated fieldset
+    %{updated_fieldset | is_valid?: is_valid?(updated_fieldset)}
+  end
+
+  @doc """
+  A fieldset is valid if all of its fields and all the fields of all the nested fieldsets (recursively) are valid
+  """
+  defp is_valid?(fieldset) do
+    all_fields_valid? = Enum.map(fieldset.fields, &validate/1) |> Enum.all?()
+    all_fieldsets_valid? = Enum.map(fieldset.fieldsets, &validate/1) |> Enum.all?()
+
+    all_fields_valid? and all_fieldsets_valid?
+  end
+
+  def validate(%Field{} = field) do
+    if field.question.is_required? do
+      not is_nil(field.answer)
+    else
+      true
+    end
+  end
+
+  def validate(%Fieldset{} = fieldset) do
+    is_valid?(fieldset)
   end
 end

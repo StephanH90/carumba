@@ -51,6 +51,18 @@ defmodule CarumbaWeb.DocumentLive do
     {:noreply, socket}
   end
 
+  def handle_info({:destroyed_answer, answer}, socket) do
+    %{assigns: %{fieldset: fieldset}} = socket
+
+    fieldset = FieldsetHelpers.remove_destroyed_answer_in_fieldset(fieldset, answer)
+
+    socket =
+      socket
+      |> assign(fieldset: fieldset)
+
+    {:noreply, socket}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -70,6 +82,8 @@ defmodule CarumbaWeb.DocumentLive do
     <ul id="document-navigation" phx-update="stream">
       <li :for={fieldset <- @fieldsets} id={"fieldset-#{fieldset.form.slug}"}>
         <.link patch={"?form=#{fieldset.form.slug}"}><%= fieldset.form.slug %></.link>
+
+        <input type="checkbox" checked={FieldsetHelpers.validate(fieldset)} />
       </li>
     </ul>
     """
