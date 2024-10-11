@@ -54,7 +54,7 @@ defmodule CarumbaWeb.DocumentLive do
   def handle_info({:destroyed_answer, answer}, socket) do
     %{assigns: %{fieldset: fieldset}} = socket
 
-    fieldset = FieldsetHelpers.remove_destroyed_answer_in_fieldset(fieldset, answer)
+    fieldset = FieldsetHelpers.remove_answer_in_fieldset(fieldset, answer)
 
     socket =
       socket

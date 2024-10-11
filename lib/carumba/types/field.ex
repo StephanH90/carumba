@@ -6,11 +6,10 @@ defmodule Carumba.Types.Field do
   alias Carumba.CarumbaForm.Form
 
   @enforce_keys [:question, :answer]
-  defstruct [:question, :answer, is_valid?: false]
+  defstruct [:question, :answer]
 
   @type t() :: %__MODULE__{
           question: Form.t(),
-          answer: Answer.t(),
-          is_valid?: boolean()
+          answer: Answer.t()
         }
 end

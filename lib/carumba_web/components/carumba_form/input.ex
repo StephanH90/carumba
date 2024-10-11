@@ -22,6 +22,7 @@ defmodule CarumbaWeb.CarumbaForm.Input do
     value = params["form"]["value"] || params["value"]
 
     if not is_nil(field.answer) and (is_nil(value) or value == "") do
+      send(self(), {:destroyed_answer, field.answer})
       Ash.destroy!(field.answer)
 
       {:noreply, socket}
