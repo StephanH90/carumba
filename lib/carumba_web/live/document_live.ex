@@ -68,7 +68,7 @@ defmodule CarumbaWeb.DocumentLive do
     ~H"""
     <div class="grid grid-cols-4 gap-8">
       <div class="col-span-1">
-        <.navigation fieldsets={@fieldset.fieldsets} />
+        <.navigation fieldsets={@fieldset.fieldsets} current_fieldset={@current_fieldset} />
       </div>
       <div class="col-span-3">
         <.live_component id="form" module={CarumbaWeb.CarumaForm.Form} fieldset={@current_fieldset} />
@@ -80,7 +80,11 @@ defmodule CarumbaWeb.DocumentLive do
   defp navigation(assigns) do
     ~H"""
     <ul id="document-navigation" phx-update="stream">
-      <li :for={fieldset <- @fieldsets} id={"fieldset-#{fieldset.form.slug}"}>
+      <li
+        :for={fieldset <- @fieldsets}
+        id={"fieldset-#{fieldset.form.slug}"}
+        class={fieldset == @current_fieldset && "font-semibold"}
+      >
         <.link patch={"?form=#{fieldset.form.slug}"}><%= fieldset.form.slug %></.link>
 
         <input type="checkbox" checked={FieldsetHelpers.validate(fieldset)} />
