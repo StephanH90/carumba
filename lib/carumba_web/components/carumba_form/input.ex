@@ -1,4 +1,6 @@
 defmodule CarumbaWeb.CarumbaForm.Input do
+  @moduledoc false
+
   use CarumbaWeb, :live_component
 
   alias Carumba.CarumbaForm

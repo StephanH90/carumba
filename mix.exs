@@ -64,7 +64,8 @@ defmodule Carumba.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:nimble_parsec, "~> 1.4"},
       {:smokestack, "~> 0.9.0", only: [:test], runtime: false},
-      {:faker, "~> 0.18", only: :test}
+      {:faker, "~> 0.18", only: :test},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 

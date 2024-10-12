@@ -1,4 +1,6 @@
 defmodule Carumba.QuestionParser do
+  @moduledoc false
+
   alias Carumba.CarumbaForm.Answer
   alias Carumba.CarumbaForm.Document
 

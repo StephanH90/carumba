@@ -1,4 +1,5 @@
 defmodule JexlParser do
+  @moduledoc false
   import NimbleParsec
 
   # Define parsers for different elements of JEXL

@@ -1,4 +1,7 @@
 defmodule Carumba.CarumbaForm.Validations.Answer do
+  @moduledoc """
+  Validates Carumba Answer
+  """
   use Ash.Resource.Validation
 
   @impl true
@@ -21,7 +24,7 @@ defmodule Carumba.CarumbaForm.Validations.Answer do
         :ok
 
       false ->
-        error_msg = Enum.map(changeset.errors, fn error -> error.message end) |> Enum.join(". ")
+        error_msg = Enum.map_join(changeset.errors, ". ", fn error -> error.message end)
         {:error, field: :value, message: error_msg}
     end
   end

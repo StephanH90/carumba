@@ -1,4 +1,7 @@
 defmodule Carumba.Test.Factory do
+  @moduledoc """
+  This modules is used to create factories for tests
+  """
   use Smokestack
 
   alias Carumba.CarumbaForm.Document

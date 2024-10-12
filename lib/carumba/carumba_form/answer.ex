@@ -61,7 +61,7 @@ defmodule Carumba.CarumbaForm.Answer do
         case CarumbaForm.get_answer(document_uuid, question_slug) do
           {:ok, answer} ->
             if (is_binary(value) and value == "") or (is_boolean(value) and not value) or
-                 (is_list(value) and length(value) == 0) do
+                 (is_list(value) and Enum.empty?(value)) do
               CarumbaForm.destroy_answer(answer)
             else
               CarumbaForm.update_answer(answer, %{value: value})

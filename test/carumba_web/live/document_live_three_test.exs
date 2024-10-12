@@ -39,6 +39,6 @@ defmodule CarumbaWeb.DocumentLiveThreeTest do
       "value" => ""
     })
 
-    assert length(Ash.read!(Answer)) == 0
+    assert Enum.empty?(Ash.read!(Answer))
   end
 end

@@ -115,7 +115,7 @@ defmodule CarumbaWeb.CarumbaForm.FieldsetHelpers do
   @doc """
   A fieldset is valid if all of its fields and all the fields of all the nested fieldsets (recursively) are valid
   """
-  defp is_valid?(fieldset) do
+  defp perform_validation(fieldset) do
     all_fields_valid? = Enum.map(fieldset.fields, &validate/1) |> Enum.all?()
     all_fieldsets_valid? = Enum.map(fieldset.fieldsets, &validate/1) |> Enum.all?()
 
@@ -131,6 +131,6 @@ defmodule CarumbaWeb.CarumbaForm.FieldsetHelpers do
   end
 
   def validate(%Fieldset{} = fieldset) do
-    is_valid?(fieldset)
+    perform_validation(fieldset)
   end
 end
