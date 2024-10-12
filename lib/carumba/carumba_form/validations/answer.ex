@@ -1,25 +1,28 @@
 defmodule Carumba.CarumbaForm.Validations.Answer do
   use Ash.Resource.Validation
 
-  alias Carumba.CarumbaForm.Question
-
   @impl true
   def validate(changeset, _opts, _ctx) do
     new_value = Ash.Changeset.get_argument_or_attribute(changeset, :value)
-    question_slug = Ash.Changeset.get_argument_or_attribute(changeset, :question)
+
+    question_slug =
+      Ash.Changeset.get_argument_or_attribute(changeset, :question_id) ||
+        Ash.Changeset.get_argument_or_attribute(changeset, :question)
 
     question = Carumba.CarumbaForm.get_question!(question_slug)
 
     changeset =
       changeset
       |> validate_is_required?(question, new_value)
+      |> validate_value(question, new_value)
 
     case changeset.valid? do
       true ->
         :ok
 
       false ->
-        changeset.errors
+        error_msg = Enum.map(changeset.errors, fn error -> error.message end) |> Enum.join(". ")
+        {:error, field: :value, message: error_msg}
     end
   end
 
@@ -31,73 +34,54 @@ defmodule Carumba.CarumbaForm.Validations.Answer do
     changeset
   end
 
-  # TODO: reimplement this
-  # def validate(%Ash.Changeset{context: %{}} = changeset, opts, ctx) do
-  #   # If we haven't preloaded the question in the context we do this now and then rerun this validation function
-  #   question =
-  #     Ash.get!(Carumba.CarumbaForm.Question, %{
-  #       id:
-  #         changeset.data.question_id ||
-  #           Ash.Changeset.get_argument_or_attribute(changeset, :question)
-  #     })
-
-  #   changeset = Ash.Changeset.put_context(changeset, :question, question)
-
-  #   validate(changeset, opts, ctx)
-  # end
-
-  # def validate_is_required?(changeset, %Question{is_required?: true}, new_value)
-  #      when is_nil(new_value) or new_value == "" do
-  #   Ash.Changeset.add_error(changeset, field: :value, message: "is required")
-  # end
-
-  # def validate_is_required?(changeset, %Question{is_required?: true}, _new_value), do: changeset
-  # def validate_is_required?(changeset, %Question{is_required?: false}, _new_value), do: changeset
-
-  # TODO: Write these for different question types
-  def validate_configuration(
+  def validate_value(
         changeset,
-        #  todo: in future this would look like this: %Question{type: :string, configuration: %{"min_length" => min_length}},
-        %Question{configuration: %{"min_length" => min_length}},
-        "min_length",
+        %{type: :text, configuration: %{"min_length" => min_length, "max_length" => max_length}},
         new_value
-      )
-      when is_binary(new_value) do
-    if String.length(new_value || "") < min_length do
-      Ash.Changeset.add_error(changeset,
-        field: :value,
-        message: "length of #{String.length(new_value || "")} is too short. min length is #{min_length}"
-      )
-    else
-      changeset
-    end
-  end
-
-  def validate_configuration(
-        changeset,
-        #  todo: in future this would look like this: %Question{type: :string, configuration: %{"min_length" => min_length}},
-        %Question{configuration: %{"max_length" => max_length}},
-        "max_length",
-        new_value
-      )
-      when is_binary(new_value) do
-    if String.length(new_value || "") > max_length do
-      Ash.Changeset.add_error(changeset,
-        field: :value,
-        message: "length of #{String.length(new_value || "")} is too long. max length is #{max_length}"
-      )
-    else
-      changeset
-    end
-  end
-
-  # This needs to be the last method because it is the fallback for all the other configuration keys that are not actually validations
-  def validate_configuration(
-        changeset,
-        _question,
-        _other_config_key,
-        _new_value
       ) do
+    new_value = convert_to_string(new_value)
+
+    if String.length(new_value) > min_length && String.length(new_value) <= max_length do
+      changeset
+    else
+      add_error(changeset, "needs to be longer than #{min_length} and shorter than #{max_length}")
+    end
+  end
+
+  @spec validate_value(Ash.Changeset.t(), Carumba.CarumbaForm.Question.t(), any()) :: Ash.Changeset.t()
+  def validate_value(changeset, %{type: :text, configuration: %{"min_length" => min_length}}, new_value) do
+    new_value = convert_to_string(new_value)
+
+    if String.length(new_value) > min_length do
+      changeset
+    else
+      add_error(changeset, "too short")
+    end
+  end
+
+  def validate_value(changeset, %{type: :text, configuration: %{"max_length" => max_length}}, new_value) do
+    new_value = convert_to_string(new_value)
+
+    if String.length(new_value) <= max_length do
+      changeset
+    else
+      add_error(changeset, "too long")
+    end
+  end
+
+  def validate_value(changeset, %{type: :text}, _new_value) do
     changeset
   end
+
+  defp add_error(changeset, message) do
+    Ash.Changeset.add_error(changeset,
+      field: :value,
+      message: message
+    )
+  end
+
+  defp convert_to_string(new_value) when is_integer(new_value), do: Integer.to_string(new_value)
+  defp convert_to_string(new_value) when is_float(new_value), do: Float.to_string(new_value)
+  defp convert_to_string(new_value) when is_binary(new_value), do: new_value
+  defp convert_to_string(new_value) when is_nil(new_value), do: ""
 end

@@ -23,7 +23,16 @@ defmodule CarumbaWeb.CarumbaForm.Input do
 
     if not is_nil(field.answer) and (is_nil(value) or value == "") do
       send(self(), {:destroyed_answer, field.answer})
-      Ash.destroy!(field.answer)
+      CarumbaForm.destroy_answer(field.answer)
+
+      field = %{field | answer: nil}
+
+      socket =
+        socket
+        |> assign_form(field, fieldset)
+
+      # TODO: Handle special case where it is possible to delete an answer for a required question
+      # TODO: but it should raise a validation error
 
       {:noreply, socket}
     else
@@ -31,10 +40,11 @@ defmodule CarumbaWeb.CarumbaForm.Input do
         {:ok, answer} ->
           send(self(), {:updated_answer, answer})
 
+          field = %{field | answer: answer}
+
           socket =
             socket
             |> assign_form(field, fieldset)
-            |> assign(field: %{field | answer: answer})
 
           {:noreply, socket}
 

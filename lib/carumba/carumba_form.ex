@@ -9,9 +9,9 @@ defmodule Carumba.CarumbaForm do
     end
 
     resource Carumba.CarumbaForm.Answer do
-      define :save_answer, action: :save, args: [:document, :question, :value]
+      define :save_answer, action: :save, args: [:document_id, :question_id, :value]
 
-      define :create_answer, action: :create, args: [:document, :question, :value]
+      define :create_answer, action: :create, args: [:document_id, :question_id, :value]
       define :update_answer, action: :update
       define :get_answer, action: :read, get_by: [:document_id, :question_id]
       define :destroy_answer, action: :destroy

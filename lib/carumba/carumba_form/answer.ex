@@ -15,7 +15,12 @@ defmodule Carumba.CarumbaForm.Answer do
   end
 
   actions do
-    defaults [:destroy, :read]
+    defaults [:read]
+
+    destroy :destroy do
+      primary? true
+      validate CarumbaForm.Validations.Answer
+    end
 
     read :get_answer do
       get_by [:document_id, :question_id]
@@ -32,14 +37,14 @@ defmodule Carumba.CarumbaForm.Answer do
       change manage_relationship(:document, type: :append_and_remove)
       change manage_relationship(:question, type: :append_and_remove)
 
-      # validate Carumba.CarumbaForm.Validations.Answer
+      # validate CarumbaForm.Validations.Answer
     end
 
     update :update do
       accept [:value]
       primary? true
       require_atomic? false
-      # validate Carumba.CarumbaForm.Validations.Answer
+      validate CarumbaForm.Validations.Answer
     end
 
     action :save, :struct do
@@ -70,8 +75,8 @@ defmodule Carumba.CarumbaForm.Answer do
   end
 
   relationships do
-    belongs_to :document, Carumba.CarumbaForm.Document
-    belongs_to :question, Carumba.CarumbaForm.Question, destination_attribute: :slug, attribute_type: :string
+    belongs_to :document, CarumbaForm.Document
+    belongs_to :question, CarumbaForm.Question, destination_attribute: :slug, attribute_type: :string
   end
 
   identities do
